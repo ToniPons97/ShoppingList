@@ -2,7 +2,7 @@ import 'react-native-get-random-values';
 import uuid from 'react-native-uuid';
 
 import React, { useState } from 'react';
-import {View, StyleSheet, FlatList, Alert, StatusBar} from 'react-native';
+import {View, StyleSheet, FlatList, Alert, StatusBar, Platform} from 'react-native';
 
 import Header from './components/Header';
 import ListItem from './components/ListItem';
@@ -26,27 +26,81 @@ const App = () => {
       setItems(prevItems => prevItems.sort((a, b) => a.text.localeCompare(b.text)));
     }
     else
-      Alert.alert('Nothing to add. Please enter an item.')
+      Alert.alert(
+        'Empty shopping list...', 
+        'Please enter one or more items.',
+        [
+          {text: 'Got it'}
+        ],
+        Platform.OS === 'android' && {
+          cancelable: true
+        }
+      );
   }
 
   const clearItems = () => {
-    Alert.alert('Think twice...', 
-      'Are you sure you want to delete all shopping items?',
+    const alertTitle = 'Think twice...';
+    const alertSubtitle = 'Are you sure you want to delete all shopping items?';
+    const cancelBtnTxt = 'Cancel';
+    const deleteBtnTxt = 'delete all';
+
+    Alert.alert(
+      alertTitle, 
+      alertSubtitle,
       [
         {
-          text: 'Cancel',
+          text: cancelBtnTxt,
           style: "cancel",
         },
         {
-          text: 'delete all',
+          text: deleteBtnTxt,
           onPress: () => setItems([]),
           style: 'destructive'
         }
       ],
-      {
+      Platform.OS === 'android' && {
         cancelable: true,
       }
+  );
+
+    /*
+    if (Platform.OS === 'android') {
+      Alert.alert(
+        alertTitle, 
+        alertSubtitle,
+        [
+          {
+            text: cancelBtnTxt,
+            style: "cancel",
+          },
+          {
+            text: deleteBtnTxt,
+            onPress: () => setItems([]),
+            style: 'destructive'
+          }
+        ],
+        {
+          cancelable: true,
+        }
     );
+    }
+    else if (Platform.OS === 'ios') {
+      Alert.alert(
+        alertTitle,
+        alertSubtitle,
+        [
+          {
+            text: cancelBtnTxt,
+            style: "cancel"
+          },
+          { 
+            text: deleteBtnTxt, 
+            onPress: () => setItems([])
+          }
+        ]
+      );
+    }
+    */
   }
 
   return (
