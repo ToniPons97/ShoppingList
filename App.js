@@ -30,6 +30,14 @@ const App = () => {
   }, [items]);
   */
 
+  /*
+  const interval = setInterval(() => {
+    console.log(items, items.length);
+  }, 5000);
+  */
+
+
+
   const deleteItem = (id) => {
     setItems(prevItems => prevItems.filter(item => item.id != id));
 
@@ -43,6 +51,7 @@ const App = () => {
       let data = JSON.stringify(items);
       //MMKV.setString(KEY, data);
       MMKV.setStringAsync(KEY, data);
+      //clearInterval(interval);
       /*
       data = JSON.parse(MMKV.getString(KEY));
       console.log('SETTIMEOUT ' + MMKV.getString(KEY));
