@@ -1,7 +1,9 @@
 import 'react-native-get-random-values';
 import uuid from 'react-native-uuid';
 
-import React, { useState } from 'react';
+import { MMKVLoader } from 'react-native-mmkv-storage';
+
+import React, { useState, useEffect } from 'react';
 import {View, StyleSheet, FlatList, Alert, StatusBar, Platform} from 'react-native';
 
 import Header from './components/Header';
@@ -10,10 +12,23 @@ import AddItem from './components/AddItem';
 import ClearItems from './components/ClearItems';
 
 const App = () => {
-  const KEY = '@storage_Key';
+  const KEY = 'data';
+  const MMKV = new MMKVLoader().initialize();
 
+  const storedData = JSON.parse(MMKV.getString(KEY));
+  console.log(storedData);
 
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState(storedData === '' ? [] : storedData);
+
+  /*
+  useEffect(() => {
+    let data = JSON.stringify(items);
+    MMKV.setString(data);
+
+    data = JSON.parse(MMKV.getString(KEY));
+    console.log('useEffect: ' + data);
+  }, [items]);
+  */
 
   const deleteItem = (id) => {
     setItems(prevItems => prevItems.filter(item => item.id != id));
@@ -21,21 +36,30 @@ const App = () => {
   }
 
   const addItem = (text) => {
-    if (text !== '') {
-      setItems(prevItems => [{id: uuid.v4(), text}, ...prevItems]);
+    if (text !== '') {      
+      setItems(prevItems => [{id: uuid.v4(), text: text.trim()}, ...prevItems]);
       setItems(prevItems => prevItems.sort((a, b) => a.text.localeCompare(b.text)));
+      
+      let data = JSON.stringify(items);
+      //MMKV.setString(KEY, data);
+      MMKV.setStringAsync(KEY, data);
+      /*
+      data = JSON.parse(MMKV.getString(KEY));
+      console.log('SETTIMEOUT ' + MMKV.getString(KEY));
+      */
     }
-    else
-      Alert.alert(
-        'Empty shopping list...', 
-        'Please enter one or more items.',
-        [
-          {text: 'Got it'}
-        ],
-        Platform.OS === 'android' && {
-          cancelable: true
-        }
-      );
+    else {
+        Alert.alert(
+          'Empty shopping list...', 
+          'Please enter one or more items.',
+          [
+            {text: 'Got it'}
+          ],
+          Platform.OS === 'android' && {
+            cancelable: true
+          }
+        );
+    }
   }
 
   const clearItems = () => {
@@ -44,7 +68,7 @@ const App = () => {
     const cancelBtnTxt = 'Cancel';
     const deleteBtnTxt = 'delete all';
 
-    Alert.alert(
+    Alert.alert (
       alertTitle, 
       alertSubtitle,
       [
@@ -54,53 +78,18 @@ const App = () => {
         },
         {
           text: deleteBtnTxt,
-          onPress: () => setItems([]),
+          onPress: () => {
+            MMKV.setStringAsync(KEY, JSON.stringify([]));
+            const data = JSON.parse(MMKV.getString(KEY));
+            setItems(data);
+          },
           style: 'destructive'
         }
       ],
       Platform.OS === 'android' && {
         cancelable: true,
       }
-  );
-
-    /*
-    if (Platform.OS === 'android') {
-      Alert.alert(
-        alertTitle, 
-        alertSubtitle,
-        [
-          {
-            text: cancelBtnTxt,
-            style: "cancel",
-          },
-          {
-            text: deleteBtnTxt,
-            onPress: () => setItems([]),
-            style: 'destructive'
-          }
-        ],
-        {
-          cancelable: true,
-        }
     );
-    }
-    else if (Platform.OS === 'ios') {
-      Alert.alert(
-        alertTitle,
-        alertSubtitle,
-        [
-          {
-            text: cancelBtnTxt,
-            style: "cancel"
-          },
-          { 
-            text: deleteBtnTxt, 
-            onPress: () => setItems([])
-          }
-        ]
-      );
-    }
-    */
   }
 
   return (
