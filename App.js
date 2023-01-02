@@ -18,25 +18,7 @@ const App = () => {
   const storedData = JSON.parse(MMKV.getString(KEY));
   console.log(storedData);
 
-  const [items, setItems] = useState(storedData === '' ? [] : storedData);
-
-  /*
-  useEffect(() => {
-    let data = JSON.stringify(items);
-    MMKV.setString(data);
-
-    data = JSON.parse(MMKV.getString(KEY));
-    console.log('useEffect: ' + data);
-  }, [items]);
-  */
-
-  /*
-  const interval = setInterval(() => {
-    console.log(items, items.length);
-  }, 5000);
-  */
-
-
+  const [items, setItems] = useState((storedData === null || storedData === '') ? [] : storedData);
 
   const deleteItem = (id) => {
     setItems(prevItems => prevItems.filter(item => item.id != id));
@@ -49,13 +31,8 @@ const App = () => {
       setItems(prevItems => prevItems.sort((a, b) => a.text.localeCompare(b.text)));
       
       let data = JSON.stringify(items);
-      //MMKV.setString(KEY, data);
       MMKV.setStringAsync(KEY, data);
-      //clearInterval(interval);
-      /*
-      data = JSON.parse(MMKV.getString(KEY));
-      console.log('SETTIMEOUT ' + MMKV.getString(KEY));
-      */
+
     }
     else {
         Alert.alert(
