@@ -16,23 +16,26 @@ const App = () => {
   const MMKV = new MMKVLoader().initialize();
 
   const storedData = JSON.parse(MMKV.getString(KEY));
-  console.log(storedData);
+  //console.log(storedData);
 
   const [items, setItems] = useState((storedData === null || storedData === '') ? [] : storedData);
 
-  const deleteItem = (id) => {
-    setItems(prevItems => prevItems.filter(item => item.id != id));
+  useEffect(() => {
+    const data = JSON.stringify(items);
+    try {
+      MMKV.setStringAsync(KEY, data);
+      //console.log(MMKV.getString(KEY));
+    } catch(e) {
+      //console.log(e);
+    }
+  }, [items]);
 
-  }
+  const deleteItem = (id) => setItems(prevItems => prevItems.filter(item => item.id != id));
 
   const addItem = (text) => {
     if (text !== '') {      
       setItems(prevItems => [{id: uuid.v4(), text: text.trim()}, ...prevItems]);
       setItems(prevItems => prevItems.sort((a, b) => a.text.localeCompare(b.text)));
-      
-      let data = JSON.stringify(items);
-      MMKV.setStringAsync(KEY, data);
-
     }
     else {
         Alert.alert(
@@ -64,11 +67,7 @@ const App = () => {
         },
         {
           text: deleteBtnTxt,
-          onPress: () => {
-            MMKV.setStringAsync(KEY, JSON.stringify([]));
-            const data = JSON.parse(MMKV.getString(KEY));
-            setItems(data);
-          },
+          onPress: () => setItems([]),
           style: 'destructive'
         }
       ],
